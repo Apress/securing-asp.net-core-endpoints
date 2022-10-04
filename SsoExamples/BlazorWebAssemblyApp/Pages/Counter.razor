@@ -1,0 +1,55 @@
+﻿@page "/counter"
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Microsoft.AspNetCore.SignalR.Client
+@inject IAccessTokenProvider TokenProvider
+@implements IAsyncDisposable
+
+<PageTitle>SignalR Message Counter</PageTitle>
+
+<h1>SignalR Message Counter</h1>
+
+<p role="status">Number of SignalR messages: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="SendMessage">Send Message</button>
+
+@code {
+    private int currentCount = 0;
+    private HubConnection? hubConnection;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+
+    private void SendMessage()
+    {
+        hubConnection?.SendAsync("BroadcastMessage", "New Message.");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var accessTokenResult = await TokenProvider.RequestAccessToken();
+        string? accessToken = null;
+
+        if (accessTokenResult.TryGetToken(out var token))
+        {
+            accessToken = token.Value;
+        }
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl("https://localhost:7184/demoHub", options => {
+                options.AccessTokenProvider = () => Task.FromResult(accessToken);
+            }).Build();
+
+        hubConnection.On<string>("ReceiveMessage", (m) => IncrementCount());
+
+        await hubConnection.StartAsync();
+        await hubConnection.SendAsync("AddClientToManagersGroup");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection != null)
+            await hubConnection.DisposeAsync();
+    }
+}

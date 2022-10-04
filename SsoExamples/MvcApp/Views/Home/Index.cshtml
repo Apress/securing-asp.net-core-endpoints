@@ -1,0 +1,44 @@
+﻿@model IEnumerable<MvcApp.Models.WeatherForecast>
+
+@{
+    ViewData["Title"] = "Weather Forecasts";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Date
+            </th>
+            <th>
+                Summary
+            </th>
+            <th>
+                Temperature C
+            </th>
+            <th>
+                Temperature F
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Date.DayOfWeek)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Summary)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TemperatureC)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TemperatureF)
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
